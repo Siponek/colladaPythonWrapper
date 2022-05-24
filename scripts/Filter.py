@@ -9,6 +9,8 @@ def main():
     """Main funtion from reading, preparing objects, applying transformations, saving to file"""
 
     pathToFile: str = ".\data\\" + "cubes_scene.dae"
+    # pathToSave: str = ".\data\\" + "cubes_scene_yellow.dae"
+    # pathToSave: str = ".\data\\" + "cubes_scene_blue.dae"
     pathToSave: str = ".\data\\" + "cubes_scene_filtered.dae"
 
     with open(file=pathToFile, mode="rb") as cubesSceneFile:
@@ -33,13 +35,13 @@ def main():
 
         listToPickFrom = filterByUniformArea(scene=mesh.scene, upper_bound=15)
 
+        newSceneMesh.assetInfo.upaxis = "Z_UP"
         newSceneMesh = prepareColladaObj(
             newSceneMesh,
             mesh,
             listToPickFrom=listToPickFrom,
             verbose=False,
         )
-        newSceneMesh.assetInfo.upaxis = "Z_UP"
         originPoint = meanOfCentre(listToPickFrom)
         originPoint_negative = np.negative(originPoint)
 
