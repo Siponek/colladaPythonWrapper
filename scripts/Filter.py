@@ -23,6 +23,7 @@ def main():
         )
 
         newSceneMesh = cl.Collada()
+        # ? Chaning the listToPickFrom to quickly test out the fucntions
 
         # listToPickFrom = filterByMaterial(scene=mesh.scene, verbose=False)
 
@@ -43,7 +44,6 @@ def main():
         originPoint_negative = np.negative(originPoint)
 
         # ? Transformation Part
-        print(newSceneMesh.scene.nodes[0])
         applyTransformation(
             scene=newSceneMesh.scene,
             transform_offsetX=originPoint_negative[0],
