@@ -2,6 +2,20 @@
 
 ## Usage
 
+Run the Filter.py. To change the results pick a diffrent fucntion in script.
+
+```python
+        # ? Chaning the listToPickFrom to quickly test out the fucntions
+
+        listToPickFrom = filterByMaterial(scene=mesh.scene, verbose=False)
+
+        listToPickFrom = filterByMaterial(
+            scene=mesh.scene, materialName="Material.002"
+        )
+
+        listToPickFrom = filterByUniformArea(scene=mesh.scene, upper_bound=15)
+```
+
 ### Examples
 
 ```python
