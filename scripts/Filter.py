@@ -9,7 +9,7 @@ def main():
     """Main funtion from reading, preparing objects, applying transformations, saving to file"""
 
     pathToFile: str = ".\data\\" + "cubes_scene.dae"
-    pathToSave: str = ".\data\\" + "cubes_scene_yellow.dae"
+    pathToSave: str = ".\data\\" + "cubes_scene_filtered.dae"
 
     with open(file=pathToFile, mode="rb") as cubesSceneFile:
         mesh = cl.Collada(cubesSceneFile)
@@ -24,17 +24,14 @@ def main():
 
         newSceneMesh = cl.Collada()
 
-        listToPickFrom = filterByMaterial(scene=mesh.scene, verbose=False)
+        # listToPickFrom = filterByMaterial(scene=mesh.scene, verbose=False)
+
         # listToPickFrom = filterByMaterial(
         #     scene=mesh.scene, materialName="Material.002"
         # )
-        # listToPickFrom = filterByUniformArea(scene=mesh.scene, upper_bound=15)
-        # newSceneMesh = prepareColladaObj(
-        #     newSceneMesh,
-        #     mesh,
-        #     listToPickFrom=listToPickFrom,
-        #     verbose=False,
-        # )
+
+        listToPickFrom = filterByUniformArea(scene=mesh.scene, upper_bound=15)
+
         newSceneMesh = prepareColladaObj(
             newSceneMesh,
             mesh,

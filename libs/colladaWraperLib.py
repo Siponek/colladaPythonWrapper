@@ -13,8 +13,9 @@ def filterByMaterial(
 ) -> list:
     """A function that returns a list of collada.geometry.BoundGeometry objects. Checks the first node of given obj.primitives() for material. Possbile to use obj.original on obj from list to rerutn not-bound geometry.
         'cl' as if collada imported as 'cl'.
+        The geometry.name must adhere to naming convention name_{threeincrementalDigits} e.g. cube_033, otherwise prepareColadaObj() will throw an error.
         yellowMaterial = 'Material.001' ;
-        blueMaterial = 'Material.002'
+        blueMaterial = 'Material.002'   ;
     Args:
         scene (cl.collada.scene, <class 'collada.scene.Scene'>): A cl.Collada object. (e.g. read from file)
         materialName (str, optional): Name of the material that cointains the required color/attribute. In case of not specifing correct string for the material name - it returns every material that is not 'Material.001'". Defaults to "Material.001".
@@ -76,17 +77,19 @@ def filterByUniformArea(
     inside: bool = True,
     verbose: bool = False,
 ) -> list:
-    """_summary_
+    """A function that returns a list of collada.geometry.BoundGeometry objects. Checks the first node of given obj.primitives() for position of ANY verticies in given area. Possbile to use obj.original on obj from list to rerutn not-bound geometry.
+        'cl' as if collada imported as 'cl'.
+        The geometry.name must adhere to naming convention name_{threeincrementalDigits} e.g. cube_033, otherwise prepareColadaObj() will throw an error.
 
     Args:
-        scene (_type_): _description_
-        upper_bound (float): _description_
-        lower_bound (float, optional): _description_. Defaults to 0.
-        inside (bool, optional): _description_. Defaults to True.
-        verbose (bool, optional): _description_. Defaults to False.
+        scene (collada.scene.Scene): (cl)collada scene type object.
+        upper_bound (float): Lower value for x,y,z veritcies to be checked.
+        lower_bound (float, optional): Upper value for x,y,z veritcies to be checked. Defaults to 0.
+        inside (bool, optional): If True then returns objects inside area specified by {upper_bound} and {lower_bound} otherwise returns objects outside of the area. Defaults to True.
+        verbose (bool, optional): Prints additional information. Defaults to False.
 
     Returns:
-        list: _description_
+        list: List of collada.geometry.BoundGeometry objects within specified boundires.
     """
 
     listOf_inArea: list = []
@@ -118,23 +121,23 @@ def filterByUniformArea(
 
 
 def prepareColladaObj(
-    newSceneObject,
-    objectToCopyFrom,
-    listToPickFrom,
+    newSceneObject: cl.scene.Scene,
+    objectToCopyFrom: cl.scene.Scene,
+    listToPickFrom: list,
     nameOfTheScene: str = "myscene",
     verbose: bool = False,
 ):
-    """_summary_
+    """Function that copies specific nodes(Material, Effects, Geometry) from one scene {objectToCopyFrom} to another {newSceneObject}. Works "in place" and returns the same object for code clarity.
 
     Args:
-        newSceneObject (_type_): _description_
-        objectToCopyFrom (_type_): _description_
-        listToPickFrom (_type_): _description_
-        nameOfTheScene (str, optional): _description_. Defaults to "myscene".
-        verbose (bool, optional): _description_. Defaults to False.
+        newSceneObject (collada.scene.Scene): A scene object to be copied to.
+        objectToCopyFrom (collada.scene.Scene): A scene object to be copied from.
+        listToPickFrom (list): List of filtered collada.geometry.BoundGeometry objects.
+        nameOfTheScene (str, optional): Name of the scene in new object. Defaults to "myscene".
+        verbose (bool, optional): Prints additional information. Defaults to False.
 
     Returns:
-        _type_: _description_
+        collada.scene.Scene: NewSceneObject
     """
 
     amountOfObjects = len(list(objectToCopyFrom.scene.objects("geometry")))
@@ -149,7 +152,14 @@ def prepareColladaObj(
         x_Geo = x_Geo.original
         if verbose == True:
             print("x_Geo", x_Geo.name)
-        indexOfCorrectNodes.append(amountOfObjects - int(x_Geo.name[-3:]))
+        try:
+            indexOfCorrectNodes.append(amountOfObjects - int(x_Geo.name[-3:]))
+        except Exception as errorCode:
+            print(errorCode)
+            print(
+                "Error while converting the name to id. Check the naming conditions (e.g. cube_001 , three numbers from the end)."
+            )
+            exit(1)
         newSceneObject.geometries.append(x_Geo)
     compressed_nodes = [
         val
@@ -157,10 +167,13 @@ def prepareColladaObj(
         if idx in indexOfCorrectNodes
     ]
     try:
-        if verbose == True:
-            print(compressed_nodes[0].id)
+        print(f"Checking the first element _\n> {compressed_nodes[0].id}")
     except IndexError:
-        print("Zero nodes in the selection !!!")
+        print(
+            "prepareColladaObj : Zero nodes in the selection, check the naming conditions and filtering conditions."
+        )
+        exit(1)
+
     myscene = cl.scene.Scene(nameOfTheScene, compressed_nodes)
     newSceneObject.scenes.append(myscene)
     newSceneObject.scene = myscene
@@ -169,14 +182,14 @@ def prepareColladaObj(
 
 
 def meanOfCentre(listToPickFrom: list, verbose: bool = False) -> np.ndarray:
-    """_summary_
+    """Function that calculates mean centre of vertices of all objects from given list.
 
     Args:
-        listToPickFrom (list): _description_
-        verbose (bool, optional): _description_. Defaults to True.
+        listToPickFrom (list): List of filtered collada.geometry.BoundGeometry objects.
+        verbose (bool, optional): Prints additional information. Defaults to True.
 
     Returns:
-        np.ndarray: _description_
+        np.ndarray: Numpy array with x,y,c coordinates.
     """
 
     centralPoint: np.array = 0
@@ -190,7 +203,10 @@ def meanOfCentre(listToPickFrom: list, verbose: bool = False) -> np.ndarray:
             tmpSum += arrayOfVerts
             amount += 1
     if amount < 1:
-        return print("THERE IS NOTHING IN THE LIST OF GEOMETRIES")
+        print(
+            "meanOfCentre : Zero nodes (verts) in the selection, check the naming conditions and filtering conditions."
+        )
+        exit(1)
     centralPoint = tmpSum / amount
 
     if verbose == True:
@@ -202,7 +218,7 @@ def meanOfCentre(listToPickFrom: list, verbose: bool = False) -> np.ndarray:
 
 
 def applyTransformation(
-    scene,
+    scene: cl.scene.Scene,
     pivotOfRotation=[0, 0, 0],
     transform_offsetX: float = 0,
     transform_offsetY: float = 0,
@@ -213,20 +229,19 @@ def applyTransformation(
     degreesToRotate: float = 0,
     verbose: bool = False,
 ) -> None:
-    """_summary_
+    """Function that applies transformation to all of the objects in given scene
 
     Args:
-        scene (_type_): _description_
-        pivotOfRotation (list, optional): _description_. Defaults to [0, 0, 0].
-        transform_offsetX (float, optional): _description_. Defaults to 0.
-        transform_offsetY (float, optional): _description_. Defaults to 0.
-        transform_offsetZ (float, optional): _description_. Defaults to 0.
-        scalevalueX (float, optional): _description_. Defaults to 1.
-        scalevalueY (float, optional): _description_. Defaults to 1.
-        scalevalueZ (float, optional): _description_. Defaults to 1.
-        degreesToRotate (float, optional): _description_. Defaults to 0.
-        localTransform (bool, optional): _description_. Defaults to False.
-        verbose (bool, optional): _description_. Defaults to False.
+        scene (cl.scene.Scene): (cl)collada scene type object.
+        pivotOfRotation (list, optional): Coordinates of axis [X,Y,Z] to rotate. Values diffrent than 1 also scale. Defaults to [0, 0, 0].
+        transform_offsetX (float, optional): Transformation albon X axis. Defaults to 0.
+        transform_offsetY (float, optional): Transformation albon Y axis. Defaults to 0.
+        transform_offsetZ (float, optional): Transformation albon Z axis. Defaults to 0.
+        scalevalueX (float, optional): Scaling along X axis. Defaults to 1.
+        scalevalueY (float, optional): Scaling along Y axis. Defaults to 1.
+        scalevalueZ (float, optional): Scaling along Z axis. Defaults to 1.
+        degreesToRotate (float, optional): Amount of degrees to rotate (These are being converted into radians). Defaults to 0.
+        verbose (bool, optional): Prints additional information. Defaults to False.
     """
     matrixScale = cl.scene.ScaleTransform(
         scalevalueX, scalevalueY, scalevalueZ
@@ -292,19 +307,28 @@ def applyTransformation(
 
 
 def zeroedCoords(
-    scene,
+    scene: cl.scene.Scene,
     oldInvertedMatrix: np.ndarray = np.identity(4),
     verbose: bool = False,
 ) -> list:
-    """_summary_
+    """Function that zeroes the transformation matrix of all objects in node and returns list of inverted matricies of them. To be used with reverseTranslation() and reverseRotation().
+    {oldInvertedMatrix} is optional, but a diffrent matrix passed can produce diffrent results and "return" return the geometry to a diffrent place.
+    Example:
+        # Global coordinates == local coordinates
+        negativeTranslateList = zeroedCoords(scene= newSceneMesh.scene)
+        # Bringing back old rotation
+        reverseRotation(scene= newSceneMesh.scene, oldInvertedMatrix= negativeTranslateList)
+        # Bringing back old translation
+        reverseTranslation(scene= newSceneMesh.scene, oldInvertedMatrix= negativeTranslateList)
+        # And the geometry is back in the same place
 
     Args:
-        scene (_type_): _description_
-        oldInvertedMatrix (np.ndarray, optional): _description_. Defaults to np.identity(4).
-        verbose (bool, optional): _description_. Defaults to False.
+        scene (cl.scene.Scene): (cl)collada scene type object.
+        oldInvertedMatrix (np.ndarray, optional): Inverted matrix of previous transforms. Defaults to np.identity(4).
+        verbose (bool, optional): Prints additional information. Defaults to False.
 
     Returns:
-        list: _description_
+        list: list of inverted matricies.
     """
     listOf_minusTranslates = []
     for idx, nodeX in enumerate(scene.nodes):
@@ -324,14 +348,16 @@ def zeroedCoords(
 
 
 def reverseTranslation(
-    scene, oldInvertedMatrix=np.identity(4), verbose: bool = False
+    scene: cl.scene.Scene,
+    oldInvertedMatrix=np.identity(4),
+    verbose: bool = False,
 ):
-    """_summary_
+    """Function that brings back x,y,z translation coordinates before {zeroedCoords()}
 
     Args:
-        scene (_type_): _description_
-        oldInvertedMatrix (_type_, optional): _description_. Defaults to np.identity(4).
-        verbose (bool, optional): _description_. Defaults to False.
+        scene (cl.scene.Scene): (cl)collada scene type object.
+        oldInvertedMatrix (np.ndarray, optional): Inverted matrix of previous transforms. Defaults to np.identity(4).
+        verbose (bool, optional): Prints additional information. Defaults to False.
     """
     for idx, nodeX in enumerate(scene.nodes):
         transforms_curernt = nodeX.transforms[0]
@@ -350,14 +376,16 @@ def reverseTranslation(
 
 
 def reverseRotation(
-    scene, oldInvertedMatrix=np.identity(4), verbose: bool = False
+    scene: cl.scene.Scene,
+    oldInvertedMatrix: np.ndarray = np.identity(4),
+    verbose: bool = False,
 ):
-    """_summary_
+    """Function that brings back x,y,z rotation coordinates before {zeroedCoords()}
 
     Args:
-        scene (_type_): _description_
-        oldInvertedMatrix (_type_, optional): _description_. Defaults to np.identity(4).
-        verbose (bool, optional): _description_. Defaults to False.
+        scene (cl.scene.Scene): (cl)collada scene type object.
+        oldInvertedMatrix (np.ndarray, optional): Inverted matrix of previous transforms. Defaults to np.identity(4).
+        verbose (bool, optional): Prints additional information. Defaults to False.
     """
 
     for idx, nodeX in enumerate(scene.nodes):
