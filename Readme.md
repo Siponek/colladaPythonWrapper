@@ -38,6 +38,12 @@ applyTransformation(scene= newSceneMesh.scene, transform_offsetX= originPoint[0]
 applyTransformation(scene= newSceneMesh.scene, transform_offsetY= 20,scalevalueX = 1, scalevalueY = 1, scalevalueZ = 1, verbose= False)
 
 ```
+## TODO
+
+.gitignore
+requirements.txt
+fix snake-case and camel case
+Add argprase for more generic approach when using script via CLI
 
 ## Contributing
 
