@@ -40,10 +40,10 @@ applyTransformation(scene= newSceneMesh.scene, transform_offsetY= 20,scalevalueX
 ```
 ## TODO
 
-.gitignore
-requirements.txt
-fix snake-case and camel case
-Add argprase for more generic approach when using script via CLI
+.gitignore <br />
+requirements.txt <br />
+fix snake-case and camel case <br />
+Add argprase for more generic approach when using script via CLI <br />
 
 ## Contributing
 
