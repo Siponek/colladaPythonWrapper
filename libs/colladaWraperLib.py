@@ -34,9 +34,9 @@ def filterByMaterial(
         print(
             f"FUNC filterByMaterial: Amount of nodes to search though_> {len(list_of_scene_geonodes)}"
         )
-    yellow_material = "Material.001"
+    yellow_material:str = "Material.001"
     # Not used to bring more functionality as default "garbage collector"
-    blueMaterial = "Material.002"
+    blueMaterial:str = "Material.002"
 
     list_of_yellows: list = []
     list_of_blues: list = []
@@ -297,22 +297,23 @@ def apply_transformation(
         print(f"Scaling _>\n {matrixScale.matrix}")
         print(f"Rotations _>\n {matrixRotation}")
         print(f"NEW _>\n {scene.nodes[0].transforms[0].matrix}")
+    return scene
 
 
-def zeroedCoords(
+def zeroed_coords(
     scene: cl.scene.Scene,
     old_inverted_matrix: np.ndarray = np.identity(4),
     verbose: bool = False,
 ) -> list:
-    """Function that zeroes the transformation matrix of all objects in node and returns list of inverted matricies of them. To be used with reverseTranslation() and reverse_rotation().
+    """Function that zeroes the transformation matrix of all objects in node and returns list of inverted matricies of them. To be used with reverse_translation() and reverse_rotation().
     {old_inverted_matrix} is optional, but a diffrent matrix passed can produce diffrent results and "return" return the geometry to a diffrent place.
     Example:
         # Global coordinates == local coordinates
-        negativeTranslateList = zeroedCoords(scene= newSceneMesh.scene)
+        negativeTranslateList = zeroed_coords(scene= newSceneMesh.scene)
         # Bringing back old rotation
         reverse_rotation(scene= newSceneMesh.scene, old_inverted_matrix= negativeTranslateList)
         # Bringing back old translation
-        reverseTranslation(scene= newSceneMesh.scene, old_inverted_matrix= negativeTranslateList)
+        reverse_translation(scene= newSceneMesh.scene, old_inverted_matrix= negativeTranslateList)
         # And the geometry is back in the same place
 
     Args:
@@ -340,12 +341,12 @@ def zeroedCoords(
     return listOf_minusTranslates
 
 
-def reverseTranslation(
+def reverse_translation(
     scene: cl.scene.Scene,
     old_inverted_matrix=np.identity(4),
     verbose: bool = False,
 ):
-    """Function that brings back x,y,z translation coordinates before {zeroedCoords()}
+    """Function that brings back x,y,z translation coordinates before {zeroed_coords()}
 
     Args:
         scene (cl.scene.Scene): (cl)collada scene type object.
@@ -373,7 +374,7 @@ def reverse_rotation(
     old_inverted_matrix: np.ndarray = np.identity(4),
     verbose: bool = False,
 ):
-    """Function that brings back x,y,z rotation coordinates before {zeroedCoords()}
+    """Function that brings back x,y,z rotation coordinates before {zeroed_coords()}
 
     Args:
         scene (cl.scene.Scene): (cl)collada scene type object.

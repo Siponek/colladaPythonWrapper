@@ -23,9 +23,9 @@ def main(*args, **kwargs):
         )
         new_scene_mesh = cl.Collada()
         # ? Chaning the list_to_pick_from to quickly test out the fucntions
-        list_to_pick_from = clw.filter_by_uniform_area()(scene=mesh.scene, upper_bound=15)
+        list_to_pick_from = clw.filter_by_uniform_area(scene=mesh.scene, upper_bound=15)
         new_scene_mesh.assetInfo.upaxis = "Z_UP"
-        new_scene_mesh = clw.prepareColladaObj(
+        new_scene_mesh = clw.prepare_collada_obj(
             new_scene_mesh,
             mesh,
             list_to_pick_from=list_to_pick_from,
@@ -45,7 +45,7 @@ def main(*args, **kwargs):
         clw.apply_transformation(
             scene=new_scene_mesh.scene,
             pivot_of_rotation=[0, 0, 1],
-            degreesToRotate=30,
+            degrees_to_rotate=30,
         )
 
         clw.apply_transformation(
