@@ -40,12 +40,11 @@ applyTransformation(scene= newSceneMesh.scene, transform_offsetY= 20,scalevalueX
 ```
 ## TODO
 
-.gitignore <br />
+<!-- .gitignore <br /> -->
 requirements.txt <br />
-fix snake-case and camel case <br />
+<!-- fix snake-case and camel case <br /> -->
 Add argprase for more generic approach when using script via CLI <br />
+Add method chaning
 
 ## Contributing
-
-Zapraszam na githuba <:
-<https://github.com/Siponek/colladaPythonWrapper.git>
+Feel free to contribute to this project. :><br />
